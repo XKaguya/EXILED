@@ -5,12 +5,14 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+
 namespace Exiled.Events.Patches.Events.Scp939
 {
     using System.Collections.Generic;
     using System.Reflection.Emit;
 
     using Exiled.API.Features.Pools;
+    using Exiled.Events.Attributes;
     using Exiled.Events.EventArgs.Scp939;
     using Exiled.Events.Handlers;
 
@@ -24,6 +26,7 @@ namespace Exiled.Events.Patches.Events.Scp939
     /// Patches <see cref="FootstepRippleTrigger.OnFootstepPlayed(AnimatedCharacterModel, float)" />
     /// to add the <see cref="Scp939.PlayingFootstep" /> event.
     /// </summary>
+    [EventPatch(typeof(Scp939), nameof(Scp939.PlayingFootstep))]
     [HarmonyPatch(typeof(FootstepRippleTrigger), nameof(FootstepRippleTrigger.OnFootstepPlayed))]
     internal static class PlayingFootstep
     {
@@ -33,8 +36,8 @@ namespace Exiled.Events.Patches.Events.Scp939
 
             Label ret = generator.DefineLabel();
 
-            int offset = 2;
-            int index = newInstructions.FindLastIndex(i => i.opcode == OpCodes.Call && i.Calls(Method(typeof(RippleTriggerBase), nameof(RippleTriggerBase.CheckVisibility)))) + offset;
+            int offset = 3;
+            int index = newInstructions.FindLastIndex(i => i.Calls(Method(typeof(RippleTriggerBase), nameof(RippleTriggerBase.CheckVisibility)))) + offset;
 
             newInstructions.InsertRange(index, new CodeInstruction[]
             {
@@ -59,7 +62,7 @@ namespace Exiled.Events.Patches.Events.Scp939
                 new(OpCodes.Brfalse_S, ret),
             });
 
-            newInstructions[newInstructions.Count - 1].WithLabels(ret);
+            newInstructions[newInstructions.Count - 1].labels.Add(ret);
 
             for (int z = 0; z < newInstructions.Count; z++)
                 yield return newInstructions[z];
