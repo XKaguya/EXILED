@@ -17,23 +17,33 @@ namespace Exiled.Events.EventArgs.Scp939
     public class PlayingFootstepEventArgs : IScp939Event, IDeniableEvent
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlayingFootstepEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="PlayingFootstepEventArgs" /> class.
         /// </summary>
-        /// <param name="player"><inheritdoc cref="Player"/></param>
-        /// <param name="isAllowed"><inheritdoc cref="IsAllowed"/></param>
-        public PlayingFootstepEventArgs(Player player, bool isAllowed = true)
+        /// <param name="player">
+        /// The target being shown to SCP-939.
+        /// </param>
+        /// <param name="scp939">
+        /// The player who's controlling SCP-939.
+        /// </param>
+        /// <param name="isAllowed">
+        /// Indicates whether the footstep action is allowed.
+        /// </param>
+        public PlayingFootstepEventArgs(Player player, Player scp939, bool isAllowed = true)
         {
             Player = player;
-            Scp939 = Player.Role.As<Scp939Role>();
+            Scp939 = scp939.Role.As<Scp939Role>();
             IsAllowed = isAllowed;
         }
 
         /// <summary>
-        /// Gets the player who's controlling SCP-939.
+        /// Gets the target being shown to SCP-939.
         /// </summary>
         public Player Player { get; }
 
         /// <inheritdoc/>
+        /// <summary>
+        /// Gets the player who's controlling SCP-939.
+        /// </summary>
         public Scp939Role Scp939 { get; }
 
         /// <summary>
