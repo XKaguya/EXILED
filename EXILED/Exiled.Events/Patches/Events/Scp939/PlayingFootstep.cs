@@ -45,10 +45,15 @@ namespace Exiled.Events.Patches.Events.Scp939
                 new(OpCodes.Callvirt, PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
 
+                // Player scp939 = Player.Get(hub);
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Callvirt, PropertyGetter(typeof(RippleTriggerBase), nameof(RippleTriggerBase.Player))),
+                new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
+
                 // true;
                 new(OpCodes.Ldc_I4_1),
 
-                // PlayingFootstepEventArgs ev = (player, true);
+                // PlayingFootstepEventArgs ev = (player, scp939, true);
                 new(OpCodes.Newobj, GetDeclaredConstructors(typeof(PlayingFootstepEventArgs))[0]),
                 new(OpCodes.Dup),
 
