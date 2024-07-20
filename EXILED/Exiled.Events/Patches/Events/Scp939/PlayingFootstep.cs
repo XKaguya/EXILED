@@ -5,7 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-
 namespace Exiled.Events.Patches.Events.Scp939
 {
     using System.Collections.Generic;
