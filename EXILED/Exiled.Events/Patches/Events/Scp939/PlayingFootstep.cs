@@ -5,6 +5,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Exiled.API.Features;
+
 namespace Exiled.Events.Patches.Events.Scp939
 {
     using System.Collections.Generic;
@@ -21,7 +23,7 @@ namespace Exiled.Events.Patches.Events.Scp939
     using static HarmonyLib.AccessTools;
 
     /// <summary>
-    /// Patches <see cref="FootstepRippleTrigger.OnFootstepPlayed" />
+    /// Patches <see cref="FootstepRippleTrigger.OnFootstepPlayed(AnimatedCharacterModel, float)" />
     /// to add the <see cref="Scp939.PlayingFootstep" /> event.
     /// </summary>
     [HarmonyPatch(typeof(FootstepRippleTrigger), nameof(FootstepRippleTrigger.OnFootstepPlayed))]
@@ -31,28 +33,15 @@ namespace Exiled.Events.Patches.Events.Scp939
         {
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Pool.Get(instructions);
 
-            Label returnLabel = generator.DefineLabel();
-            Label continueLabel = generator.DefineLabel();
+            Label ret = generator.DefineLabel();
 
-            int index = newInstructions.FindLastIndex(i => i.opcode == OpCodes.Callvirt && i.Calls(PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))));
-            index += -7;
-
-            newInstructions.RemoveRange(index, 7);
+            int offset = 2;
+            int index = newInstructions.FindLastIndex(i => i.opcode == OpCodes.Call && i.Calls(Method(typeof(RippleTriggerBase), nameof(RippleTriggerBase.CheckVisibility)))) + offset;
 
             newInstructions.InsertRange(index, new CodeInstruction[]
             {
-                // if (base.CheckVisibility(model.OwnerHub))
-                //    return;
-                new(OpCodes.Ldarg_1),
-                new(OpCodes.Callvirt, PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))),
-                new(OpCodes.Call, Method(typeof(RippleTriggerBase), nameof(RippleTriggerBase.CheckVisibility), new[] { typeof(ReferenceHub) })),
-
-                new(OpCodes.Brfalse_S, continueLabel),
-                new(OpCodes.Ret),
-                new CodeInstruction(OpCodes.Nop).WithLabels(continueLabel),
-
                 // Player player = Player.Get(hub);
-                new(OpCodes.Ldarg_1),
+                new CodeInstruction(OpCodes.Ldarg_1).MoveLabelsFrom(newInstructions[index]),
                 new(OpCodes.Callvirt, PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
 
@@ -69,17 +58,13 @@ namespace Exiled.Events.Patches.Events.Scp939
                 // if (!IsAllowed)
                 //      return;
                 new(OpCodes.Callvirt, PropertyGetter(typeof(PlayingFootstepEventArgs), nameof(PlayingFootstepEventArgs.IsAllowed))),
-                new(OpCodes.Brfalse_S, returnLabel),
-
-                // var for _syncPlayer
-                new(OpCodes.Ldarg_0),
-                new(OpCodes.Ldarg_1),
+                new(OpCodes.Brfalse_S, ret),
             });
 
-            newInstructions[newInstructions.Count - 1].WithLabels(returnLabel);
+            newInstructions[newInstructions.Count - 1].WithLabels(ret);
 
-            foreach (CodeInstruction instruction in newInstructions)
-                yield return instruction;
+            for (int z = 0; z < newInstructions.Count; z++)
+                yield return newInstructions[z];
 
             ListPool<CodeInstruction>.Pool.Return(newInstructions);
         }
