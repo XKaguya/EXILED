@@ -14,7 +14,7 @@ namespace Exiled.Events.EventArgs.Scp939
     /// <summary>
     /// Contains all information before the footsteps are being shown to SCP-939.
     /// </summary>
-    public class PlayingFootstepEventArgs : IScp939Event, IDeniableEvent, IPlayerEvent
+    public class PlayingFootstepEventArgs : IScp939Event, IDeniableEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PlayingFootstepEventArgs" /> class.
