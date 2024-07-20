@@ -40,12 +40,12 @@ namespace Exiled.Events.Patches.Events.Scp939
 
             newInstructions.InsertRange(index, new CodeInstruction[]
             {
-                // Player player = Player.Get(hub);
+                // Player target = Player.Get(characterModel.OwnerHub);
                 new CodeInstruction(OpCodes.Ldarg_1).MoveLabelsFrom(newInstructions[index]),
                 new(OpCodes.Callvirt, PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
 
-                // Player scp939 = Player.Get(hub);
+                // Player player = Player.Get(this.Player);
                 new(OpCodes.Ldarg_0),
                 new(OpCodes.Callvirt, PropertyGetter(typeof(RippleTriggerBase), nameof(RippleTriggerBase.Player))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
