@@ -17,7 +17,9 @@ namespace Exiled.Events.Patches.Events.Scp939
 
     using HarmonyLib;
     using PlayerRoles.FirstPersonControl.Thirdperson;
+    using PlayerRoles.PlayableScps.Scp939;
     using PlayerRoles.PlayableScps.Scp939.Ripples;
+    using PlayerRoles.Subroutines;
 
     using static HarmonyLib.AccessTools;
 
@@ -45,9 +47,9 @@ namespace Exiled.Events.Patches.Events.Scp939
                 new(OpCodes.Callvirt, PropertyGetter(typeof(CharacterModel), nameof(CharacterModel.OwnerHub))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
 
-                // Player player = Player.Get(this.Player);
+                // Player player = Player.Get(this.Owner);
                 new(OpCodes.Ldarg_0),
-                new(OpCodes.Callvirt, PropertyGetter(typeof(RippleTriggerBase), nameof(RippleTriggerBase.Player))),
+                new(OpCodes.Call, PropertyGetter(typeof(StandardSubroutine<Scp939Role>), nameof(StandardSubroutine<Scp939Role>.Owner))),
                 new(OpCodes.Call, Method(typeof(API.Features.Player), nameof(API.Features.Player.Get), new[] { typeof(ReferenceHub) })),
 
                 // true;
